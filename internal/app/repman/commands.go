@@ -1,4 +1,4 @@
-package commands
+package repman
 
 import (
 	"errors"
@@ -36,7 +36,8 @@ var scanCommand = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(path.Join(dir, args[0]))
+		path := path.Join(dir, args[0])
+		FindRepositories(path)
 	},
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
