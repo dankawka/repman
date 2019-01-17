@@ -1,4 +1,4 @@
-package repman
+package repofinder
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -32,19 +33,19 @@ func getOrigin(path string) string {
 		return ""
 	}
 
-	return string(out)
+	return strings.TrimSpace(string(out))
 }
 
 type Repository struct {
-	path   string
-	origin string
+	Path   string
+	Origin string
 }
 
-func FindRepositories(path string) {
+func FindRepositories(path string) []Repository {
 	repositories := []Repository{}
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			color.Red("Could not access path %s", path)
 			return err
 		}
 
@@ -57,12 +58,18 @@ func FindRepositories(path string) {
 
 		if found {
 			remote := getOrigin(path)
-			repositories = append(repositories, Repository{origin: remote, path: path})
+			repositories = append(repositories, Repository{Origin: remote, Path: path})
 		}
 
 		return nil
 	})
 
-	color.Yellow("Found %v repositories.", len(repositories))
+	if len(repositories) == 0 {
+		color.Yellow("Could not find repositoties under provided path.")
+		return repositories
+	}
 
+	color.Green("Found %v repositories.", len(repositories))
+
+	return repositories
 }
