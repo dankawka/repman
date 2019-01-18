@@ -50,7 +50,10 @@ var openCommand = &cobra.Command{
 	Use:   "open",
 	Short: "Shows list of saved repositories and opens selected",
 	Run: func(cmd *cobra.Command, args []string) {
-		repos := settingsmanager.GetListOfRepositories()
+		repos, err := settingsmanager.GetListOfRepositories()
+		if err != nil {
+			os.Exit(1)
+		}
 		askToOpen(repos)
 	},
 }

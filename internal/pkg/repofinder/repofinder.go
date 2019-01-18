@@ -1,6 +1,7 @@
 package repofinder
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -41,12 +42,11 @@ type Repository struct {
 	Origin string
 }
 
-func FindRepositories(path string) []Repository {
+func FindRepositories(path string) ([]Repository, error) {
 	repositories := []Repository{}
-	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			color.Red("Could not access path %s", path)
-			return err
+			return fmt.Errorf("Could not access path %s", path)
 		}
 
 		if !info.IsDir() {
@@ -64,12 +64,15 @@ func FindRepositories(path string) []Repository {
 		return nil
 	})
 
+	if err != nil {
+		return repositories, err
+	}
+
 	if len(repositories) == 0 {
-		color.Yellow("Could not find repositoties under provided path.")
-		return repositories
+		return repositories, errors.New("Could not find repositoties under provided path")
 	}
 
 	color.Green("Found %v repositories.", len(repositories))
 
-	return repositories
+	return repositories, nil
 }

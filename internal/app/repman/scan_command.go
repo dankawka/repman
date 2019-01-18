@@ -3,9 +3,8 @@ package repman
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/dankawka/repman/internal/pkg/repofinder"
@@ -17,7 +16,7 @@ import (
 
 func askToSave(repositories []repofinder.Repository) []repofinder.Repository {
 	chosenOptions := []string{}
-
+	chosenRepositories := []repofinder.Repository{}
 	repositoriesNormalized := []string{}
 
 	for _, repository := range repositories {
@@ -34,10 +33,9 @@ func askToSave(repositories []repofinder.Repository) []repofinder.Repository {
 	survey.AskOne(prompt, &chosenOptions, nil)
 
 	if len(chosenOptions) == 0 {
-		color.Yellow("You chose 0 options. Exiting application.")
+		return chosenRepositories
 	}
 
-	chosenRepositories := []repofinder.Repository{}
 	for _, repository := range repositories {
 		for _, option := range chosenOptions {
 			if strings.Contains(option, repository.Origin) && strings.Contains(option, repository.Path) {
@@ -53,13 +51,23 @@ var scanCommand = &cobra.Command{
 	Use:   "scan [PATH]",
 	Short: "Scans recursively folder for Git repositories",
 	Run: func(cmd *cobra.Command, args []string) {
-		dir, err := os.Getwd()
+		path, err := filepath.Abs(args[0])
 		if err != nil {
-			log.Fatal(err)
+			color.Red(err.Error())
+			os.Exit(1)
 		}
-		path := path.Join(dir, args[0])
-		repositories := repofinder.FindRepositories(path)
+		repositories, err := repofinder.FindRepositories(path)
+		if err != nil {
+			color.Red(err.Error())
+			os.Exit(1)
+		}
 		chosenRepositories := askToSave(repositories)
+
+		if len(chosenRepositories) == 0 {
+			color.Yellow("You chose 0 options. Exiting application.")
+			os.Exit(0)
+		}
+
 		settingsmanager.SaveRepositories(chosenRepositories)
 	},
 	Args: func(cmd *cobra.Command, args []string) error {

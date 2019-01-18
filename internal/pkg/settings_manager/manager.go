@@ -3,7 +3,6 @@ package settingsmanager
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/user"
 	"path"
@@ -12,10 +11,10 @@ import (
 	"github.com/fatih/color"
 )
 
-func getAppStoreDirectory() string {
+func getAppStoreDirectory() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	appPath := path.Join(usr.HomeDir, ".repman")
@@ -25,32 +24,47 @@ func getAppStoreDirectory() string {
 		err = os.MkdirAll(appPath, 0755)
 		if err != nil {
 			color.Red("Could not create application folder %v", appPath)
+			return "", err
 		}
 	}
-	return appPath
+	return appPath, nil
 }
 
-func SaveRepositories(repositories []repofinder.Repository) {
+func SaveRepositories(repositories []repofinder.Repository) error {
 	data, _ := json.Marshal(repositories)
 
-	homePath := getAppStoreDirectory()
+	homePath, err := getAppStoreDirectory()
+
+	if err != nil {
+		return err
+	}
+
 	filePath := path.Join(homePath, "repos.json")
 	d1 := []byte(data)
-	err := ioutil.WriteFile(filePath, d1, 0644)
+	err = ioutil.WriteFile(filePath, d1, 0644)
 
 	if err != nil {
 		color.Red("Could not save file under %v", filePath)
+		return err
 	}
+
+	return nil
 }
 
-func GetListOfRepositories() []repofinder.Repository {
-	homePath := getAppStoreDirectory()
+func GetListOfRepositories() ([]repofinder.Repository, error) {
+	homePath, err := getAppStoreDirectory()
+	var result []repofinder.Repository
+
+	if err != nil {
+		return result, err
+	}
+
 	filePath := path.Join(homePath, "repos.json")
 
-	_, err := os.Stat(filePath)
+	_, err = os.Stat(filePath)
 	if err != nil {
 		color.Red("File with list of repositories does not exists or is not accessible, use 'scan' option first.")
-		os.Exit(0)
+		return result, err
 	}
 
 	jsonFile, err := os.Open(filePath)
@@ -58,12 +72,11 @@ func GetListOfRepositories() []repofinder.Repository {
 
 	if err != nil {
 		color.Red("Could not open file with list of repositories under %s", filePath)
-		os.Exit(0)
+		return result, err
 	}
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
-	var result []repofinder.Repository
 	json.Unmarshal([]byte(byteValue), &result)
-	return result
+	return result, nil
 }
