@@ -42,3 +42,28 @@ func SaveRepositories(repositories []repofinder.Repository) {
 		color.Red("Could not save file under %v", filePath)
 	}
 }
+
+func GetListOfRepositories() []repofinder.Repository {
+	homePath := getAppStoreDirectory()
+	filePath := path.Join(homePath, "repos.json")
+
+	_, err := os.Stat(filePath)
+	if err != nil {
+		color.Red("File with list of repositories does not exists or is not accessible, use 'scan' option first.")
+		os.Exit(0)
+	}
+
+	jsonFile, err := os.Open(filePath)
+	defer jsonFile.Close()
+
+	if err != nil {
+		color.Red("Could not open file with list of repositories under %s", filePath)
+		os.Exit(0)
+	}
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	var result []repofinder.Repository
+	json.Unmarshal([]byte(byteValue), &result)
+	return result
+}

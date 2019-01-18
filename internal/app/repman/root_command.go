@@ -23,4 +23,5 @@ func Execute() {
 
 func RegisterCommands() {
 	rootCmd.AddCommand(scanCommand)
+	rootCmd.AddCommand(openCommand)
 }

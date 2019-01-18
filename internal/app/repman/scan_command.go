@@ -15,7 +15,7 @@ import (
 	survey "gopkg.in/AlecAivazis/survey.v1"
 )
 
-func ask(repositories []repofinder.Repository) []repofinder.Repository {
+func askToSave(repositories []repofinder.Repository) []repofinder.Repository {
 	chosenOptions := []string{}
 
 	repositoriesNormalized := []string{}
@@ -59,7 +59,7 @@ var scanCommand = &cobra.Command{
 		}
 		path := path.Join(dir, args[0])
 		repositories := repofinder.FindRepositories(path)
-		chosenRepositories := ask(repositories)
+		chosenRepositories := askToSave(repositories)
 		settingsmanager.SaveRepositories(chosenRepositories)
 	},
 	Args: func(cmd *cobra.Command, args []string) error {
