@@ -26,7 +26,12 @@ func askToOpen(repositories []repofinder.Repository) {
 	}
 
 	var selectedOption = ""
+
+	// make terminal not line wrap
+	fmt.Printf("\x1b[?7l")
 	survey.AskOne(prompt, &selectedOption, nil)
+	// defer restoring line wrap
+	defer fmt.Printf("\x1b[?7h")
 
 	if len(selectedOption) == 0 {
 		color.Yellow("No option chosen, exiting app.")

@@ -30,7 +30,11 @@ func askToSave(repositories []repofinder.Repository) []repofinder.Repository {
 		PageSize: 25,
 	}
 
+	// make terminal not line wrap
+	fmt.Printf("\x1b[?7l")
 	survey.AskOne(prompt, &chosenOptions, nil)
+	// defer restoring line wrap
+	defer fmt.Printf("\x1b[?7h")
 
 	if len(chosenOptions) == 0 {
 		return chosenRepositories
