@@ -54,6 +54,12 @@ var openCommand = &cobra.Command{
 		if err != nil {
 			os.Exit(1)
 		}
+
+		if len(repos) == 0 {
+			color.Yellow("No repositories saved, use option 'add' or 'scan'")
+			os.Exit(0)
+		}
+
 		askToOpen(repos)
 	},
 }

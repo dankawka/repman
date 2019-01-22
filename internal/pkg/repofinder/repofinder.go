@@ -76,3 +76,16 @@ func FindRepositories(path string) ([]Repository, error) {
 
 	return repositories, nil
 }
+
+func GetRepositoryFromPath(path string) (Repository, error) {
+	isGitRepository := checkIfGitDirectoryExists(path)
+	if !isGitRepository {
+		return Repository{}, errors.New("not a git repository")
+	}
+
+	remote := getOrigin(path)
+	return Repository{
+		Origin: remote,
+		Path:   path,
+	}, nil
+}

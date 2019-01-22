@@ -30,21 +30,32 @@ func getAppStoreDirectory() (string, error) {
 	return appPath, nil
 }
 
-func SaveRepositories(repositories []repofinder.Repository) error {
-	data, _ := json.Marshal(repositories)
-
+func getReposFilePath() (string, error) {
 	homePath, err := getAppStoreDirectory()
+
+	if err != nil {
+		return "", err
+	}
+
+	filePath := path.Join(homePath, "repos.json")
+
+	return filePath, nil
+}
+
+func SaveRepositories(repositories []repofinder.Repository) error {
+	repoFilePath, err := getReposFilePath()
 
 	if err != nil {
 		return err
 	}
 
-	filePath := path.Join(homePath, "repos.json")
+	data, _ := json.Marshal(repositories)
+
 	d1 := []byte(data)
-	err = ioutil.WriteFile(filePath, d1, 0644)
+	err = ioutil.WriteFile(repoFilePath, d1, 0644)
 
 	if err != nil {
-		color.Red("Could not save file under %v", filePath)
+		color.Red("Could not save file under %v", repoFilePath)
 		return err
 	}
 
@@ -52,26 +63,24 @@ func SaveRepositories(repositories []repofinder.Repository) error {
 }
 
 func GetListOfRepositories() ([]repofinder.Repository, error) {
-	homePath, err := getAppStoreDirectory()
+	repoFilePath, err := getReposFilePath()
+
+	if err != nil {
+		return nil, err
+	}
+
 	var result []repofinder.Repository
 
+	_, err = os.Stat(repoFilePath)
 	if err != nil {
-		return result, err
+		return result, nil
 	}
 
-	filePath := path.Join(homePath, "repos.json")
-
-	_, err = os.Stat(filePath)
-	if err != nil {
-		color.Red("File with list of repositories does not exists or is not accessible, use 'scan' option first.")
-		return result, err
-	}
-
-	jsonFile, err := os.Open(filePath)
+	jsonFile, err := os.Open(repoFilePath)
 	defer jsonFile.Close()
 
 	if err != nil {
-		color.Red("Could not open file with list of repositories under %s", filePath)
+		color.Red("Could not open file with list of repositories under %s", repoFilePath)
 		return result, err
 	}
 
@@ -79,4 +88,31 @@ func GetListOfRepositories() ([]repofinder.Repository, error) {
 
 	json.Unmarshal([]byte(byteValue), &result)
 	return result, nil
+}
+
+func CheckIfAlreadySaved(repository repofinder.Repository) bool {
+	repositories, _ := GetListOfRepositories()
+
+	exists := false
+
+	for _, repo := range repositories {
+		if repo.Origin == repository.Origin && repo.Path == repository.Path {
+			exists = true
+		}
+	}
+
+	return exists
+}
+
+func AppendRepository(repository repofinder.Repository) error {
+	alreadySavedRepositories, _ := GetListOfRepositories()
+
+	extended := append(alreadySavedRepositories, repository)
+	err := SaveRepositories(extended)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

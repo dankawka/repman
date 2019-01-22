@@ -68,7 +68,25 @@ var scanCommand = &cobra.Command{
 			os.Exit(0)
 		}
 
-		settingsmanager.SaveRepositories(chosenRepositories)
+		currentRepositories, _ := settingsmanager.GetListOfRepositories()
+
+		extended := currentRepositories
+
+		for _, r := range chosenRepositories {
+			alreadyExists := false
+			for _, cr := range currentRepositories {
+				if r.Origin == cr.Origin && r.Path == cr.Path {
+					alreadyExists = true
+				}
+			}
+			if alreadyExists {
+				alreadyExists = false
+			} else {
+				extended = append(extended, r)
+			}
+		}
+
+		settingsmanager.SaveRepositories(extended)
 	},
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
