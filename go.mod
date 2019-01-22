@@ -2,8 +2,10 @@ module github.com/dankawka/repman
 
 require (
 	github.com/AlecAivazis/survey v1.8.0 // indirect
+	github.com/Netflix/go-expect v0.0.0-20180928190340-9d1f4485533b // indirect
 	github.com/fatih/color v1.7.0
 	github.com/google/pprof v0.0.0-20190109223431-e84dfd68c163 // indirect
+	github.com/hinshun/vt10x v0.0.0-20180809195222-d55458df857c // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
