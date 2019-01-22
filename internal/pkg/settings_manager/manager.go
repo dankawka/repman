@@ -7,7 +7,7 @@ import (
 	"os/user"
 	"path"
 
-	"github.com/dankawka/repman/internal/pkg/repofinder"
+	"github.com/dankawka/repman/internal/pkg/models"
 	"github.com/fatih/color"
 )
 
@@ -42,7 +42,7 @@ func getReposFilePath() (string, error) {
 	return filePath, nil
 }
 
-func SaveRepositories(repositories []repofinder.Repository) error {
+func SaveRepositories(repositories []models.Repository) error {
 	repoFilePath, err := getReposFilePath()
 
 	if err != nil {
@@ -62,14 +62,14 @@ func SaveRepositories(repositories []repofinder.Repository) error {
 	return nil
 }
 
-func GetListOfRepositories() ([]repofinder.Repository, error) {
+func GetListOfRepositories() ([]models.Repository, error) {
 	repoFilePath, err := getReposFilePath()
 
 	if err != nil {
 		return nil, err
 	}
 
-	var result []repofinder.Repository
+	var result []models.Repository
 
 	_, err = os.Stat(repoFilePath)
 	if err != nil {
@@ -90,7 +90,7 @@ func GetListOfRepositories() ([]repofinder.Repository, error) {
 	return result, nil
 }
 
-func CheckIfAlreadySaved(repository repofinder.Repository) bool {
+func CheckIfAlreadySaved(repository models.Repository) bool {
 	repositories, _ := GetListOfRepositories()
 
 	exists := false
@@ -104,7 +104,7 @@ func CheckIfAlreadySaved(repository repofinder.Repository) bool {
 	return exists
 }
 
-func AppendRepository(repository repofinder.Repository) error {
+func AppendRepository(repository models.Repository) error {
 	alreadySavedRepositories, _ := GetListOfRepositories()
 
 	extended := append(alreadySavedRepositories, repository)

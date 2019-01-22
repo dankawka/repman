@@ -7,35 +7,24 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/dankawka/repman/internal/pkg/models"
+	"github.com/dankawka/repman/internal/pkg/prompts"
 	"github.com/dankawka/repman/internal/pkg/repofinder"
 	settingsmanager "github.com/dankawka/repman/internal/pkg/settings_manager"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	survey "gopkg.in/AlecAivazis/survey.v1"
 )
 
-func askToSave(repositories []repofinder.Repository) []repofinder.Repository {
-	chosenOptions := []string{}
-	chosenRepositories := []repofinder.Repository{}
+func askToSave(repositories []models.Repository) []models.Repository {
 	repositoriesNormalized := []string{}
 
 	for _, repository := range repositories {
 		repositoriesNormalized = append(repositoriesNormalized, fmt.Sprintf("Path: %s | Origin: %s", repository.Path, repository.Origin))
 	}
 
-	prompt := &survey.MultiSelect{
-		Message:  "Which repository you would like to save:",
-		Options:  repositoriesNormalized,
-		Default:  repositoriesNormalized,
-		PageSize: 25,
-	}
+	chosenOptions := prompts.MultiselectPrompt("Which repository you would like to save:", repositoriesNormalized, repositoriesNormalized)
 
-	// make terminal not line wrap
-	fmt.Printf("\x1b[?7l")
-	survey.AskOne(prompt, &chosenOptions, nil)
-	// defer restoring line wrap
-	defer fmt.Printf("\x1b[?7h")
-
+	chosenRepositories := []models.Repository{}
 	if len(chosenOptions) == 0 {
 		return chosenRepositories
 	}

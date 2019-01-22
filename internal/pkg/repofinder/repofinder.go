@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/dankawka/repman/internal/pkg/models"
 	"github.com/fatih/color"
 )
 
@@ -37,13 +38,8 @@ func getOrigin(path string) string {
 	return strings.TrimSpace(string(out))
 }
 
-type Repository struct {
-	Path   string
-	Origin string
-}
-
-func FindRepositories(path string) ([]Repository, error) {
-	repositories := []Repository{}
+func FindRepositories(path string) ([]models.Repository, error) {
+	repositories := []models.Repository{}
 	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return fmt.Errorf("Could not access path %s", path)
@@ -58,7 +54,7 @@ func FindRepositories(path string) ([]Repository, error) {
 
 		if found {
 			remote := getOrigin(path)
-			repositories = append(repositories, Repository{Origin: remote, Path: path})
+			repositories = append(repositories, models.Repository{Origin: remote, Path: path})
 		}
 
 		return nil
@@ -77,14 +73,14 @@ func FindRepositories(path string) ([]Repository, error) {
 	return repositories, nil
 }
 
-func GetRepositoryFromPath(path string) (Repository, error) {
+func GetRepositoryFromPath(path string) (models.Repository, error) {
 	isGitRepository := checkIfGitDirectoryExists(path)
 	if !isGitRepository {
-		return Repository{}, errors.New("not a git repository")
+		return models.Repository{}, errors.New("not a git repository")
 	}
 
 	remote := getOrigin(path)
-	return Repository{
+	return models.Repository{
 		Origin: remote,
 		Path:   path,
 	}, nil

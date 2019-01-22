@@ -6,39 +6,27 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/dankawka/repman/internal/pkg/repofinder"
+	"github.com/dankawka/repman/internal/pkg/models"
+	"github.com/dankawka/repman/internal/pkg/prompts"
 	settingsmanager "github.com/dankawka/repman/internal/pkg/settings_manager"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	survey "gopkg.in/AlecAivazis/survey.v1"
 )
 
-func askToOpen(repositories []repofinder.Repository) {
+func askToOpen(repositories []models.Repository) {
 	repositoriesNormalized := []string{}
 	for _, repository := range repositories {
 		repositoriesNormalized = append(repositoriesNormalized, fmt.Sprintf("Path: %s | Origin: %s", repository.Path, repository.Origin))
 	}
 
-	prompt := &survey.Select{
-		Message:  "Which repository you would like to open:",
-		Options:  repositoriesNormalized,
-		PageSize: 25,
-	}
-
-	var selectedOption = ""
-
-	// make terminal not line wrap
-	fmt.Printf("\x1b[?7l")
-	survey.AskOne(prompt, &selectedOption, nil)
-	// defer restoring line wrap
-	defer fmt.Printf("\x1b[?7h")
+	selectedOption := prompts.SingleSelect("Which repository you would like to open:", repositoriesNormalized)
 
 	if len(selectedOption) == 0 {
 		color.Yellow("No option chosen, exiting app.")
 		os.Exit(0)
 	}
 
-	chosenRepository := repofinder.Repository{}
+	chosenRepository := models.Repository{}
 	for _, repository := range repositories {
 		if strings.Contains(selectedOption, repository.Origin) && strings.Contains(selectedOption, repository.Path) {
 			chosenRepository = repository
