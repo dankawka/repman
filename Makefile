@@ -1,2 +1,2 @@
 build:
-	go build -o ./repman ./cmd/repman/main.go
+	go build -o ./out/repman ./cmd/repman/main.go
